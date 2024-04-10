@@ -26,4 +26,4 @@ jobs:
           cd ncm && bump2version patch
       - name: Push changes
         run: |
-          git push origin main
+          git push origin master
