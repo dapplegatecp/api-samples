@@ -1,0 +1,37 @@
+name: bump version
+
+on:
+  push:
+    paths:
+      - "ncm/**"
+
+jobs:
+  bump_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for changes in directory
+        id: check_changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^ncm/'; then
+            echo "::set-output name=changes::true"
+          else
+            echo "::set-output name=changes::false"
+          fi
+      - uses: actions/checkout@v2
+        if: steps.check_changes.outputs.changes == 'true'
+      - name: Set up Python
+        if: steps.check_changes.outputs.changes == 'true'
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.12" # specify the version of Python you're using
+
+      - name: Bump version
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          cd ncm && bump2version patch
+
+      - name: Push changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git push origin main
